@@ -1,63 +1,31 @@
-name: youtube-mcp
-version: 1.0.0
-description: YouTube MCP for transcript, search, and analysis functionality
 
-# Environment variables required
-env:
-  - GEMINI_API_KEY
-  - YOUTUBE_API_KEY
+type: stdio
 
-# Dependencies
-dependencies:
-  python: "3.11"
-  pip:
-    - youtube-transcript-api
-    - google-generativeai
-    - aiohttp
-    - python-dotenv
+configSchema:
+  type: object
+  required: ["GEMINI_API_KEY", "YOUTUBE_API_KEY"]
+  properties:
+    GEMINI_API_KEY:
+      type: string
+      description: "Google Gemini API key for AI operations"
+    YOUTUBE_API_KEY:
+      type: string
+      description: "YouTube Data API key for YouTube API operations"
 
-# Service configuration
-service:
-  type: mcp
-  port: 8000
-  healthcheck:
-    path: /health
-    interval: 30s
-    timeout: 5s
-    retries: 3
+commandFunction: |
+  function getCommand(config) {
+    return {
+      command: "python",
+      args: ["main.py"],
+      env: {
+        "GEMINI_API_KEY": config.GEMINI_API_KEY,
+        "YOUTUBE_API_KEY": config.YOUTUBE_API_KEY
+      }
+    };
+  }
 
-# MCP specific configuration
-mcp:
-  tools:
-    - name: youtube/get-transcript
-      description: Get transcript for a YouTube video
-      timeout: 30s
-    - name: youtube/summarize
-      description: Summarize a YouTube video using Gemini AI
-      timeout: 60s
-    - name: youtube/query
-      description: Query video content using natural language
-      timeout: 30s
-    - name: youtube/search
-      description: Search YouTube videos with detailed metadata
-      timeout: 30s
-    - name: youtube/get-comments
-      description: Get comments from a YouTube video
-      timeout: 30s
-    - name: youtube/get-likes
-      description: Get like count for a YouTube video
-      timeout: 15s
-
-# Resource limits
-resources:
-  cpu: "1"
-  memory: "512Mi"
-
-# Deployment configuration
-deployment:
-  replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0 
+build:
+  # Optional: Path to Dockerfile if not in the same directory
+  dockerfile: "Dockerfile"
+  # Optional: Docker build context if not the current directory
+  dockerBuildPath: "." 
