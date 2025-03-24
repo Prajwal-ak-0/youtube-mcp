@@ -1,7 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "youtube"
+name = "youtube-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "YouTube MCP Server for video analysis with Gemini AI"
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = []
+requires-python = ">=3.9"
+license = {text = "MIT"}
+keywords = ["youtube", "mcp", "ai", "gemini", "transcript"]
+authors = [
+    {name = "Prajwal-ak-0"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "mcp",
+    "google-genai",
+    "aiohttp",
+    "youtube-transcript-api",
+    "python-dotenv",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Prajwal-ak-0/youtube-mcp"
+"Bug Tracker" = "https://github.com/Prajwal-ak-0/youtube-mcp/issues"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.black]
+line-length = 88
+target-version = ["py39", "py310", "py311"]

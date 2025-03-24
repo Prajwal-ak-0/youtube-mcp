@@ -7,6 +7,16 @@ from mcp.server.fastmcp.exceptions import ToolError
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 
+"""
+YouTube MCP: A Model Context Protocol (MCP) server for YouTube video analysis.
+This MCP server provides tools to extract transcripts, search videos, analyze content,
+and retrieve engagement metrics from YouTube videos using Google Gemini AI.
+
+Environment Variables:
+    - GEMINI_API_KEY: API key for Google Gemini AI services
+    - YOUTUBE_API_KEY: API key for YouTube Data API v3
+"""
+
 load_dotenv()
 
 mcp = FastMCP("openai-llm")
@@ -18,7 +28,26 @@ genai_client = None  # Initialize genai_client here
 
 @mcp.tool("youtube/get-transcript")
 async def get_transcript(video_id: str, languages: List[str] = ["en"]) -> List[Dict]:
-    """Get YouTube video transcript with MCP error handling"""
+    """
+    Retrieves the transcript/subtitles for a specified YouTube video.
+    
+    Uses the YouTube Transcript API to fetch time-coded transcripts in the requested languages.
+    The transcripts include timing information, text content, and duration for each segment.
+    
+    Args:
+        video_id (str): The YouTube video ID (11-character string from video URL)
+        languages (List[str], optional): List of language codes to search for transcripts.
+                                        Defaults to ["en"] (English).
+    
+    Returns:
+        List[Dict]: A list containing a single dictionary with:
+            - type: "transcript"
+            - data: Dictionary containing video_id, segments (list of transcript entries), 
+                   and languages requested
+    
+    Raises:
+        ToolError: When transcript retrieval fails (video unavailable, no captions, etc.)
+    """
     try:
         transcript = YouTubeTranscriptApi.get_transcript(
             video_id, 
@@ -38,7 +67,23 @@ async def get_transcript(video_id: str, languages: List[str] = ["en"]) -> List[D
 
 @mcp.tool("youtube/summarize")
 async def summarize_transcript(video_id: str) -> List[Dict]:
-    """Summarize transcript using Gemini Flash"""
+    """
+    Generates a concise summary of a YouTube video's content using Gemini AI.
+    
+    This tool first retrieves the video's transcript, then uses Google's Gemini 2.0 Flash
+    model to create a structured summary of the key points discussed in the video.
+    
+    Args:
+        video_id (str): The YouTube video ID to summarize
+    
+    Returns:
+        List[Dict]: A list containing a single dictionary with:
+            - type: "summary"
+            - data: Dictionary containing video_id, summary text, and model used
+    
+    Raises:
+        ToolError: When summarization fails (API key missing, transcript unavailable, etc.)
+    """
     try:
         global genai_client
         
@@ -77,7 +122,26 @@ async def summarize_transcript(video_id: str) -> List[Dict]:
 
 @mcp.tool("youtube/query")
 async def query_transcript(video_id: str, query: str) -> List[Dict]:
-    """Answer natural language queries about a YouTube video using its transcript"""
+    """
+    Answers natural language questions about a YouTube video's content.
+    
+    This tool leverages Google's Gemini 2.0 Flash model to provide responses to questions
+    based solely on the video's transcript. It extracts insights, facts, and context
+    without watching the video itself.
+    
+    Args:
+        video_id (str): The YouTube video ID to query
+        query (str): Natural language question about the video content
+    
+    Returns:
+        List[Dict]: A list containing a single dictionary with:
+            - type: "query-response"
+            - data: Dictionary containing video_id, the original query, 
+                   the AI-generated response, and model used
+    
+    Raises:
+        ToolError: When query fails (API key missing, transcript unavailable, etc.)
+    """
     try:
         global genai_client
         
@@ -125,7 +189,40 @@ async def query_transcript(video_id: str, query: str) -> List[Dict]:
 
 @mcp.tool("youtube/search")
 async def search_videos(query: str, max_results: int = 5) -> List[Dict]:
-    """Search YouTube for videos matching a query and return metadata"""
+    """
+    Searches YouTube for videos matching a specific query and returns detailed metadata.
+    
+    This tool performs a two-step API process:
+    1. First searches for videos matching the query
+    2. Then fetches detailed metadata for each result (title, channel, views, etc.)
+    
+    Args:
+        query (str): Search terms to find relevant videos
+        max_results (int, optional): Maximum number of results to return. 
+                                    Defaults to 5, capped at 50.
+    
+    Returns:
+        List[Dict]: A list containing a single dictionary with:
+            - type: "search-results"
+            - data: Dictionary containing original query, list of video objects
+                   with detailed metadata, and total result count
+                   
+    Video metadata includes:
+        - id: YouTube video ID
+        - title: Video title
+        - description: Video description
+        - thumbnail: URL to high-quality thumbnail
+        - channel_title: Channel name
+        - channel_id: YouTube channel ID
+        - published_at: Publication timestamp
+        - views: View count
+        - likes: Like count
+        - comments: Comment count
+        - duration: Video duration in ISO 8601 format
+    
+    Raises:
+        ToolError: When search fails (API key missing, API error, etc.)
+    """
     try:
         if not YOUTUBE_API_KEY:
             raise ToolError("YOUTUBE_API_KEY environment variable is not set")
@@ -200,9 +297,39 @@ async def search_videos(query: str, max_results: int = 5) -> List[Dict]:
 
 @mcp.tool("youtube/get-comments")
 async def get_comments(video_id: str, max_comments: int = 100) -> List[Dict]:
-    """Get video comments using YouTube Data API"""
+    """
+    Retrieves comments from a YouTube video using the YouTube Data API.
+    
+    This tool fetches top-level comments from a video's comment section,
+    including author information, comment text, timestamps, and like counts.
+    
+    Args:
+        video_id (str): The YouTube video ID to get comments from
+        max_comments (int, optional): Maximum number of comments to retrieve.
+                                     Defaults to 100, capped at 100 per API limits.
+    
+    Returns:
+        List[Dict]: A list containing a single dictionary with:
+            - type: "comments"
+            - data: Dictionary containing video_id and a list of comment objects
+                   
+    Comment objects include metadata from the YouTube API such as:
+        - authorDisplayName: Comment author's display name
+        - authorProfileImageUrl: URL to author's profile picture
+        - authorChannelUrl: URL to author's YouTube channel
+        - textDisplay: Comment text with formatting
+        - textOriginal: Plain text version of comment
+        - likeCount: Number of likes on the comment
+        - publishedAt: Comment publication timestamp
+        - updatedAt: Last edit timestamp (if edited)
+    
+    Raises:
+        ToolError: When comment retrieval fails (API key missing, comments disabled, etc.)
+    """
     try:
-        
+        if not YOUTUBE_API_KEY:
+            raise ToolError("YOUTUBE_API_KEY environment variable is not set")
+            
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 "https://www.googleapis.com/youtube/v3/commentThreads",
@@ -215,12 +342,16 @@ async def get_comments(video_id: str, max_comments: int = 100) -> List[Dict]:
             ) as response:
                 data = await response.json()
                 
+        if 'error' in data:
+            raise ToolError(f"YouTube API error: {data['error']['message']}")
+                
         return [{
             "type": "comments",
             "data": {
                 "video_id": video_id,
                 "comments": [item['snippet']['topLevelComment']['snippet'] 
-                            for item in data.get('items', [])]
+                            for item in data.get('items', [])],
+                "total_count": len(data.get('items', []))
             }
         }]
     except Exception as e:
@@ -228,9 +359,27 @@ async def get_comments(video_id: str, max_comments: int = 100) -> List[Dict]:
 
 @mcp.tool("youtube/get-likes")
 async def get_likes(video_id: str) -> List[Dict]:
-    """Get video like count"""
+    """
+    Retrieves the current like count for a specified YouTube video.
+    
+    This tool accesses the YouTube Data API to fetch the most up-to-date
+    engagement statistics for a video, specifically focusing on like count.
+    
+    Args:
+        video_id (str): The YouTube video ID to get likes for
+    
+    Returns:
+        List[Dict]: A list containing a single dictionary with:
+            - type: "stats"
+            - data: Dictionary containing video_id and likes count
+    
+    Raises:
+        ToolError: When like count retrieval fails (API key missing, video unavailable, etc.)
+    """
     try:
-        
+        if not YOUTUBE_API_KEY:
+            raise ToolError("YOUTUBE_API_KEY environment variable is not set")
+            
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 "https://www.googleapis.com/youtube/v3/videos",
@@ -241,6 +390,12 @@ async def get_likes(video_id: str) -> List[Dict]:
                 }
             ) as response:
                 data = await response.json()
+                
+        if 'error' in data:
+            raise ToolError(f"YouTube API error: {data['error']['message']}")
+                
+        if not data.get('items'):
+            raise ToolError(f"Video not found: {video_id}")
                 
         return [{
             "type": "stats",
