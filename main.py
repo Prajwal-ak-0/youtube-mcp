@@ -22,8 +22,33 @@ load_dotenv()
 
 mcp = FastMCP("openai-llm")
 
-# Initialize variables that will be accessed at runtime
+# Initialize variable to cache the Gemini client instance
 genai_client = None
+
+def get_genai_client():
+    """
+    Initialize and return the Gemini client, using API key from environment variables.
+    
+    This method ensures we're getting the latest environment variable value each time.
+    
+    Returns:
+        genai.Client: Initialized Gemini client
+        
+    Raises:
+        ToolError: If the GEMINI_API_KEY environment variable is not set
+    """
+    global genai_client
+    
+    # Get API key at runtime
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_api_key:
+        raise ToolError("GEMINI_API_KEY environment variable is not set")
+        
+    # Initialize client if not already done
+    if genai_client is None:
+        genai_client = genai.Client(api_key=gemini_api_key)
+    
+    return genai_client
 
 @mcp.tool("youtube/get-transcript")
 async def get_transcript(video_id: str, languages: List[str] = ["en"]) -> List[Dict]:
@@ -84,20 +109,13 @@ async def summarize_transcript(video_id: str) -> List[Dict]:
         ToolError: When summarization fails (API key missing, transcript unavailable, etc.)
     """
     try:
-        global genai_client
-        
-        # Get API key at runtime
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if not gemini_api_key:
-            raise ToolError("GEMINI_API_KEY environment variable is not set")
-            
-        if genai_client is None:
-            genai_client = genai.Client(api_key=gemini_api_key)
+        # Get Gemini client
+        client = get_genai_client()
             
         transcript_data = await get_transcript(video_id)
         transcript = " ".join([t['text'] for t in transcript_data[0]['data']['segments']])
         
-        response = genai_client.models.generate_content(
+        response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=[{
                 "role": "user",
@@ -144,20 +162,13 @@ async def query_transcript(video_id: str, query: str) -> List[Dict]:
         ToolError: When query fails (API key missing, transcript unavailable, etc.)
     """
     try:
-        global genai_client
-        
-        # Get API key at runtime
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if not gemini_api_key:
-            raise ToolError("GEMINI_API_KEY environment variable is not set")
-            
-        if genai_client is None:
-            genai_client = genai.Client(api_key=gemini_api_key)
+        # Get Gemini client
+        client = get_genai_client()
             
         transcript_data = await get_transcript(video_id)
         transcript = " ".join([t['text'] for t in transcript_data[0]['data']['segments']])
         
-        response = genai_client.models.generate_content(
+        response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=[{
                 "role": "user",
