@@ -15,11 +15,11 @@ startCommand:
       YOUTUBE_API_KEY:
         type: string
         description: API key for YouTube Data API
-    default: {}
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
     (config) => ({ command: 'python', args: ['main.py'], env: { GEMINI_API_KEY: config.GEMINI_API_KEY, YOUTUBE_API_KEY: config.YOUTUBE_API_KEY } })
-  exampleConfig:
-    GEMINI_API_KEY: your_dummy_gemini_api_key
-    YOUTUBE_API_KEY: your_dummy_youtube_api_key
+
+build:
+  dockerfile: Dockerfile
+  dockerBuildPath: .

@@ -92,8 +92,7 @@ async def summarize_transcript(video_id: str) -> List[Dict]:
             raise ToolError("GEMINI_API_KEY environment variable is not set")
             
         if genai_client is None:
-            if genai_client is None:
-                genai_client = genai.Client(api_key=gemini_api_key)
+            genai_client = genai.Client(api_key=gemini_api_key)
             
         transcript_data = await get_transcript(video_id)
         transcript = " ".join([t['text'] for t in transcript_data[0]['data']['segments']])
@@ -153,8 +152,7 @@ async def query_transcript(video_id: str, query: str) -> List[Dict]:
             raise ToolError("GEMINI_API_KEY environment variable is not set")
             
         if genai_client is None:
-            if genai_client is None:
-                genai_client = genai.Client(api_key=gemini_api_key)
+            genai_client = genai.Client(api_key=gemini_api_key)
             
         transcript_data = await get_transcript(video_id)
         transcript = " ".join([t['text'] for t in transcript_data[0]['data']['segments']])
