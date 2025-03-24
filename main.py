@@ -17,14 +17,13 @@ Environment Variables:
     - YOUTUBE_API_KEY: API key for YouTube Data API v3
 """
 
+# Load env vars from .env file for local development
 load_dotenv()
 
 mcp = FastMCP("openai-llm")
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-
-genai_client = None  # Initialize genai_client here
+# Initialize variables that will be accessed at runtime
+genai_client = None
 
 @mcp.tool("youtube/get-transcript")
 async def get_transcript(video_id: str, languages: List[str] = ["en"]) -> List[Dict]:
@@ -87,11 +86,14 @@ async def summarize_transcript(video_id: str) -> List[Dict]:
     try:
         global genai_client
         
-        if not GEMINI_API_KEY:
+        # Get API key at runtime
+        gemini_api_key = os.getenv("GEMINI_API_KEY")
+        if not gemini_api_key:
             raise ToolError("GEMINI_API_KEY environment variable is not set")
             
         if genai_client is None:
-            genai_client = genai.Client(api_key=GEMINI_API_KEY)
+            genai_client = genai.Client(api_key=gemini_api_key) genai_client is None:
+            genai_client = genai.Client(api_key=gemini_api_key)
             
         transcript_data = await get_transcript(video_id)
         transcript = " ".join([t['text'] for t in transcript_data[0]['data']['segments']])
@@ -145,11 +147,14 @@ async def query_transcript(video_id: str, query: str) -> List[Dict]:
     try:
         global genai_client
         
-        if not GEMINI_API_KEY:
+        # Get API key at runtime
+        gemini_api_key = os.getenv("GEMINI_API_KEY")
+        if not gemini_api_key:
             raise ToolError("GEMINI_API_KEY environment variable is not set")
             
         if genai_client is None:
-            genai_client = genai.Client(api_key=GEMINI_API_KEY)
+            genai_client = genai.Client(api_key=gemini_api_key) genai_client is None:
+            genai_client = genai.Client(api_key=gemini_api_key)
             
         transcript_data = await get_transcript(video_id)
         transcript = " ".join([t['text'] for t in transcript_data[0]['data']['segments']])
@@ -224,7 +229,9 @@ async def search_videos(query: str, max_results: int = 5) -> List[Dict]:
         ToolError: When search fails (API key missing, API error, etc.)
     """
     try:
-        if not YOUTUBE_API_KEY:
+        # Get API key at runtime
+        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+        if not youtube_api_key:
             raise ToolError("YOUTUBE_API_KEY environment variable is not set")
             
         async with aiohttp.ClientSession() as session:
@@ -235,7 +242,7 @@ async def search_videos(query: str, max_results: int = 5) -> List[Dict]:
                     "q": query,
                     "maxResults": min(max_results, 50),
                     "type": "video",
-                    "key": YOUTUBE_API_KEY
+                    "key": youtube_api_key
                 }
             ) as response:
                 search_data = await response.json()
@@ -261,7 +268,7 @@ async def search_videos(query: str, max_results: int = 5) -> List[Dict]:
                 params={
                     "part": "snippet,statistics,contentDetails",
                     "id": ",".join(video_ids),
-                    "key": YOUTUBE_API_KEY
+                    "key": youtube_api_key
                 }
             ) as response:
                 videos_data = await response.json()
@@ -327,7 +334,9 @@ async def get_comments(video_id: str, max_comments: int = 100) -> List[Dict]:
         ToolError: When comment retrieval fails (API key missing, comments disabled, etc.)
     """
     try:
-        if not YOUTUBE_API_KEY:
+        # Get API key at runtime
+        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+        if not youtube_api_key:
             raise ToolError("YOUTUBE_API_KEY environment variable is not set")
             
         async with aiohttp.ClientSession() as session:
@@ -337,7 +346,7 @@ async def get_comments(video_id: str, max_comments: int = 100) -> List[Dict]:
                     "part": "snippet",
                     "videoId": video_id,
                     "maxResults": min(max_comments, 100),
-                    "key": YOUTUBE_API_KEY
+                    "key": youtube_api_key
                 }
             ) as response:
                 data = await response.json()
@@ -377,7 +386,9 @@ async def get_likes(video_id: str) -> List[Dict]:
         ToolError: When like count retrieval fails (API key missing, video unavailable, etc.)
     """
     try:
-        if not YOUTUBE_API_KEY:
+        # Get API key at runtime
+        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+        if not youtube_api_key:
             raise ToolError("YOUTUBE_API_KEY environment variable is not set")
             
         async with aiohttp.ClientSession() as session:
@@ -386,7 +397,7 @@ async def get_likes(video_id: str) -> List[Dict]:
                 params={
                     "part": "statistics",
                     "id": video_id,
-                    "key": YOUTUBE_API_KEY
+                    "key": youtube_api_key
                 }
             ) as response:
                 data = await response.json()
