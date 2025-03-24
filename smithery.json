@@ -1,76 +1,83 @@
 {
-    "name": "youtube-mcp",
-    "version": "1.0.0",
-    "description": "YouTube MCP for transcript, search, and analysis functionality",
-    "env": [
-        "GEMINI_API_KEY",
-        "YOUTUBE_API_KEY"
-    ],
-    "dependencies": {
-        "python": "3.11",
-        "pip": [
-            "youtube-transcript-api",
-            "google-generativeai",
-            "aiohttp",
-            "python-dotenv"
-        ]
+  "id": "Prajwal-ak-0/youtube-mcp",
+  "name": "YouTube MCP",
+  "description": "A Model Context Protocol (MCP) server for YouTube video analysis with tools to get transcripts, summarize content, and query videos using Gemini AI.",
+  "tags": ["youtube", "video", "transcript", "summarization", "gemini", "search", "comments", "analysis"],
+  "deployment": {
+    "localOnly": false,
+    "requirements": [
+      {
+        "name": "GEMINI_API_KEY",
+        "description": "Google Gemini API key for AI operations",
+        "required": true
+      },
+      {
+        "name": "YOUTUBE_API_KEY",
+        "description": "YouTube Data API key for search and comments",
+        "required": true
+      }
+    ]
+  },
+  "examples": [
+    {
+      "name": "Get Video Transcript",
+      "description": "Extract transcript from a YouTube video",
+      "tool": "youtube/get-transcript",
+      "input": {
+        "video_id": "eHEHE2fpnWQ",
+        "languages": ["en"]
+      }
     },
-    "service": {
-        "type": "mcp",
-        "port": 8000,
-        "healthcheck": {
-            "path": "/health",
-            "interval": "30s",
-            "timeout": "5s",
-            "retries": 3
-        }
+    {
+      "name": "Summarize Video",
+      "description": "Generate a summary of a YouTube video",
+      "tool": "youtube/summarize",
+      "input": {
+        "video_id": "eHEHE2fpnWQ"
+      }
     },
-    "mcp": {
-        "tools": [
-            {
-                "name": "youtube/get-transcript",
-                "description": "Get transcript for a YouTube video",
-                "timeout": "30s"
-            },
-            {
-                "name": "youtube/summarize",
-                "description": "Summarize a YouTube video using Gemini AI",
-                "timeout": "60s"
-            },
-            {
-                "name": "youtube/query",
-                "description": "Query video content using natural language",
-                "timeout": "30s"
-            },
-            {
-                "name": "youtube/search",
-                "description": "Search YouTube videos with detailed metadata",
-                "timeout": "30s"
-            },
-            {
-                "name": "youtube/get-comments",
-                "description": "Get comments from a YouTube video",
-                "timeout": "30s"
-            },
-            {
-                "name": "youtube/get-likes",
-                "description": "Get like count for a YouTube video",
-                "timeout": "15s"
-            }
-        ]
+    {
+      "name": "Query Video Content",
+      "description": "Ask a question about the video's content",
+      "tool": "youtube/query",
+      "input": {
+        "video_id": "eHEHE2fpnWQ",
+        "query": "What are AI agents according to this video?"
+      }
     },
-    "resources": {
-        "cpu": "1",
-        "memory": "512Mi"
+    {
+      "name": "Search YouTube Videos",
+      "description": "Search for videos matching a query",
+      "tool": "youtube/search",
+      "input": {
+        "query": "AI agents explained",
+        "max_results": 5
+      }
     },
-    "deployment": {
-        "replicas": 1,
-        "strategy": {
-            "type": "RollingUpdate",
-            "rollingUpdate": {
-                "maxSurge": 1,
-                "maxUnavailable": 0
-            }
-        }
+    {
+      "name": "Get Video Comments",
+      "description": "Retrieve comments from a YouTube video",
+      "tool": "youtube/get-comments",
+      "input": {
+        "video_id": "eHEHE2fpnWQ",
+        "max_comments": 20
+      }
+    },
+    {
+      "name": "Get Video Likes",
+      "description": "Retrieve like count for a YouTube video",
+      "tool": "youtube/get-likes",
+      "input": {
+        "video_id": "eHEHE2fpnWQ"
+      }
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Prajwal-ak-0/youtube-mcp"
+  },
+  "transportWebSocketConfig": {
+    "port": 8000,
+    "path": "/ws"
+  }
 } 
