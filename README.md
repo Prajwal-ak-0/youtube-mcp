@@ -1,4 +1,5 @@
 # YouTube MCP
+[![smithery badge](https://smithery.ai/badge/@Prajwal-ak-0/youtube-mcp)](https://smithery.ai/server/@Prajwal-ak-0/youtube-mcp)
 
 A Model Context Protocol (MCP) server for YouTube video analysis, providing tools to get transcripts, summarize content, and query videos using Gemini AI.
 
@@ -17,6 +18,14 @@ A Model Context Protocol (MCP) server for YouTube video analysis, providing tool
 - YouTube Data API key
 
 ## Running Locally
+
+### Installing via Smithery
+
+To install youtube-mcp for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@Prajwal-ak-0/youtube-mcp):
+
+```bash
+npx -y @smithery/cli install @Prajwal-ak-0/youtube-mcp --client claude
+```
 
 ### Option 1: Direct Installation
 
