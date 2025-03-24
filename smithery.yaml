@@ -1,31 +1,28 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
 
-type: stdio
-
-configSchema:
-  type: object
-  required: ["GEMINI_API_KEY", "YOUTUBE_API_KEY"]
-  properties:
-    GEMINI_API_KEY:
-      type: string
-      description: "Google Gemini API key for AI operations"
-    YOUTUBE_API_KEY:
-      type: string
-      description: "YouTube Data API key for YouTube API operations"
-
-commandFunction: |
-  function getCommand(config) {
-    return {
-      command: "python",
-      args: ["main.py"],
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - GEMINI_API_KEY
+      - YOUTUBE_API_KEY
+    properties:
+      GEMINI_API_KEY:
+        type: string
+        description: Google Gemini API key for AI operations
+      YOUTUBE_API_KEY:
+        type: string
+        description: YouTube Data API key for search and comments
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |
+    (config) => ({
+      command: 'python',
+      args: ['main.py'],
       env: {
-        "GEMINI_API_KEY": config.GEMINI_API_KEY,
-        "YOUTUBE_API_KEY": config.YOUTUBE_API_KEY
+        GEMINI_API_KEY: config.GEMINI_API_KEY,
+        YOUTUBE_API_KEY: config.YOUTUBE_API_KEY
       }
-    };
-  }
-
-build:
-  # Optional: Path to Dockerfile if not in the same directory
-  dockerfile: "Dockerfile"
-  # Optional: Docker build context if not the current directory
-  dockerBuildPath: "." 
+    })
