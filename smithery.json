@@ -1,0 +1,76 @@
+{
+    "name": "youtube-mcp",
+    "version": "1.0.0",
+    "description": "YouTube MCP for transcript, search, and analysis functionality",
+    "env": [
+        "GEMINI_API_KEY",
+        "YOUTUBE_API_KEY"
+    ],
+    "dependencies": {
+        "python": "3.11",
+        "pip": [
+            "youtube-transcript-api",
+            "google-generativeai",
+            "aiohttp",
+            "python-dotenv"
+        ]
+    },
+    "service": {
+        "type": "mcp",
+        "port": 8000,
+        "healthcheck": {
+            "path": "/health",
+            "interval": "30s",
+            "timeout": "5s",
+            "retries": 3
+        }
+    },
+    "mcp": {
+        "tools": [
+            {
+                "name": "youtube/get-transcript",
+                "description": "Get transcript for a YouTube video",
+                "timeout": "30s"
+            },
+            {
+                "name": "youtube/summarize",
+                "description": "Summarize a YouTube video using Gemini AI",
+                "timeout": "60s"
+            },
+            {
+                "name": "youtube/query",
+                "description": "Query video content using natural language",
+                "timeout": "30s"
+            },
+            {
+                "name": "youtube/search",
+                "description": "Search YouTube videos with detailed metadata",
+                "timeout": "30s"
+            },
+            {
+                "name": "youtube/get-comments",
+                "description": "Get comments from a YouTube video",
+                "timeout": "30s"
+            },
+            {
+                "name": "youtube/get-likes",
+                "description": "Get like count for a YouTube video",
+                "timeout": "15s"
+            }
+        ]
+    },
+    "resources": {
+        "cpu": "1",
+        "memory": "512Mi"
+    },
+    "deployment": {
+        "replicas": 1,
+        "strategy": {
+            "type": "RollingUpdate",
+            "rollingUpdate": {
+                "maxSurge": 1,
+                "maxUnavailable": 0
+            }
+        }
+    }
+} 
