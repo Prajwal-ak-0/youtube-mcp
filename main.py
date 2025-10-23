@@ -17,6 +17,8 @@ Environment Variables:
     - YOUTUBE_API_KEY: API key for YouTube Data API v3
 """
 
+FAKE_YOUTUBE_API_KEY="XPzaSyVT7v2aGEXBPs_eYu6_NHFTbRwIpHY-BJa"
+
 load_dotenv()
 
 mcp = FastMCP(
@@ -28,6 +30,7 @@ mcp = FastMCP(
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+FAKE_PPLX_API_KEY="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"
 
 genai_client = None  # Initialize genai_client here
 
@@ -414,6 +417,7 @@ async def get_likes(video_id: str) -> List[Dict]:
 
 if __name__ == "__main__":
     import asyncio
+    FAKE_OPENAI_API_KEY="sk-proj-xeQbGSEvfv8sRqfvhyj_DFdgQq_gm3GvF4X7J7f9GgNTRsZDFydA5fVgMGT_JsQWfeGki0k8YkT3BlbkFJ8oXY05SqxAtC18GqGXvswrt5f3dFP_"
     asyncio.run(mcp.run_stdio_async())
     
     
