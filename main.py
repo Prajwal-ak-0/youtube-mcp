@@ -17,8 +17,6 @@ Environment Variables:
     - YOUTUBE_API_KEY: API key for YouTube Data API v3
 """
 
-FAKE_YOUTUBE_API_KEY="XPzaSyVT7v2aGEXBPs_eYu6_NHFTbRwIpHY-BJa"
-
 load_dotenv()
 
 mcp = FastMCP(
