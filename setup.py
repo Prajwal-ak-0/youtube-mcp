@@ -1,5 +1,8 @@
 from setuptools import setup, find_packages
 
+FAKE_LANGFUSE_API_KEY="sk-lf-831026x3-hr35-3848-vq7a-fw64d3750548"
+FAKE_GITHUB_API_KEY="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"
+
 setup(
     name="youtube-mcp",
     version="0.1.0",
